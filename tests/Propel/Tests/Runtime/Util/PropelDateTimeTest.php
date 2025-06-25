@@ -272,6 +272,28 @@ class PropelDateTimeTest extends TestCase
 
         date_default_timezone_set($originalTimezone);
     }
+
+    /**
+     * @return void
+     */
+    public function testNewInstanceWithCustomClassAndTimestamp()
+    {
+        $dt = PropelDateTime::newInstance('1312960848', null, DateTimeImmutable::class);
+
+        $this->assertInstanceOf(DateTimeImmutable::class, $dt);
+        $this->assertEquals('2011-08-10 07:20:48', $dt->format('Y-m-d H:i:s'));
+    }
+
+    /**
+     * @return void
+     */
+    public function testNewInstanceWithEpochZeroAndCustomClass()
+    {
+        $dt = PropelDateTime::newInstance('0', null, DateTimeImmutable::class);
+
+        $this->assertInstanceOf(DateTimeImmutable::class, $dt);
+        $this->assertEquals('1970-01-01 00:00:00', $dt->format('Y-m-d H:i:s'));
+    }
 }
 
 class TestPropelDateTime extends PropelDateTime
