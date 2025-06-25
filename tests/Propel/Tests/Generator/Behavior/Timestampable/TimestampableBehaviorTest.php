@@ -20,6 +20,7 @@ use TableWithoutCreatedAt;
 use TableWithoutUpdatedAt;
 use TableDateTimeClass;
 use TableColumnTypes;
+use TableIntegerTimestamps;
 
 /**
  * Tests for TimestampableBehavior class
@@ -417,5 +418,44 @@ EOF;
         $obj = new TableColumnTypes();
         $obj->save();
         $this->assertEquals($obj->getCreatedAt('U'), $obj->getUpdatedAt('U'), 'Timestampable does not set created_column and updated_column to the same value when column types are different');
+    }
+
+    /**
+     * @return void
+     */
+    public function testIntegerTimestamps()
+    {
+        $schema = <<<EOF
+<database name="timestampable_database">
+    <table name="table_integer_timestamps">
+        <column name="id" type="INTEGER" primaryKey="true" autoIncrement="true"/>
+        <column name="name" type="VARCHAR"/>
+        <column name="created_at" type="INTEGER"/>
+        <column name="updated_at" type="INTEGER"/>
+        <behavior name="timestampable"/>
+    </table>
+</database>
+EOF;
+
+        $builder = new QuickBuilder();
+        $builder->setSchema($schema);
+        $builder->build();
+
+        $obj = new TableIntegerTimestamps();
+        $obj->setName('foo');
+        $saveTime = time();
+        $obj->save();
+        $this->assertIsInt($obj->getCreatedAt());
+        $this->assertIsInt($obj->getUpdatedAt());
+        $this->assertTimeEquals($saveTime, $obj->getCreatedAt());
+        $this->assertTimeEquals($saveTime, $obj->getUpdatedAt());
+
+        sleep(1);
+        $obj->setName('bar');
+        $updateTime = time();
+        $obj->save();
+
+        $this->assertTimeEquals($saveTime, $obj->getCreatedAt());
+        $this->assertTimeEquals($updateTime, $obj->getUpdatedAt());
     }
 }
